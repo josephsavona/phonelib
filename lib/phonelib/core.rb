@@ -7,6 +7,9 @@ module Phonelib
     # default country for parsing variable setting
     @@default_country = nil
 
+    # map of region code => country data
+    @@country_map = nil
+
     # getter method for default_country variable
     def default_country
       @@default_country
@@ -115,6 +118,14 @@ module Phonelib
       end
     end
 
+    def country_code(country)
+      detected = find_country(country)
+      if detected
+        return detected[:country_code]
+      end
+      nil
+    end
+
     # method checks if passed phone number is valid
     def valid?(phone_number)
       parse(phone_number).valid?
@@ -147,6 +158,12 @@ module Phonelib
 
     private
 
+    def find_country(country)
+      country = country.upcase.to_s
+      @@country_map ||= {}
+      @@country_map[country] ||= @@phone_data.find { |data| data[:id] == country }
+    end
+
     # Load data file into memory
     def load_data
       data_file = File.dirname(__FILE__) + '/../../data/phone_data.dat'
@@ -161,7 +178,7 @@ module Phonelib
 
     # Get Phone instance for provided phone with country specified
     def detect_and_parse_by_country(phone, country)
-      detected = @@phone_data.find { |data| data[:id] == country }
+      detected = find_country(country)
       if detected
         phone = convert_phone_to_e164(phone, detected)
         Phonelib::Phone.new(phone, [detected])

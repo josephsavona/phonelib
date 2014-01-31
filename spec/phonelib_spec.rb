@@ -274,6 +274,39 @@ describe Phonelib do
     end
   end
 
+  context 'issue #21' do
+    before(:each) { @phone = Phonelib.parse '9012341234', 'JP' }
+    it 'should parse without country code given country' do
+      expect(@phone.country).to eq('JP')
+    end
+
+    it 'should be valid for country, without country code' do
+      expect(@phone.valid_for_country?('JP')).to be_true
+    end
+
+    it 'shows correct national' do
+      expect(@phone.national).to eq('090-1234-1234')
+    end
+
+    it 'shows correct international' do
+      expect(@phone.international).to eq('+81 90-1234-1234')
+    end
+  end
+
+  context 'issue #21 - get country code for region' do
+    it 'should get US country code' do
+      ['US', 'us', :us].each do |country|
+        expect(Phonelib.country_code(country)).to eq("1")
+      end
+    end
+
+    it 'should get JP country code' do
+      ['JP', 'jp', :jp].each do |country|
+        expect(Phonelib.country_code(country)).to eq("81")
+      end
+    end
+  end
+
   context 'example numbers' do
     it 'be valid' do
       data_file = File.dirname(__FILE__) + '/../data/phone_data.dat'
